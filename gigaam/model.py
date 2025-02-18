@@ -94,7 +94,9 @@ class GigaAMASR(GigaAM):
             raise ValueError("Too long wav file, use 'transcribe_longform' method.")
 
         encoded, encoded_len = self.forward(wav, length)
-        return self.decoding.decode(self.head, encoded, encoded_len)[0]
+        log_probs = self.head(encoder_output=encoded)
+        text = self.decoding.decode(self.head, encoded, encoded_len)[0]
+        return {"text": text, "log_probs": log_probs}
 
     def forward_for_export(self, features: Tensor, feature_lengths: Tensor) -> Tensor:
         """
