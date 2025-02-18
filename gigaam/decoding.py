@@ -1,9 +1,9 @@
 from typing import List, Optional
 
 import torch
+from ctcdecode import CTCBeamDecoder
 from sentencepiece import SentencePieceProcessor
 from torch import Tensor
-from ctcdecode import CTCBeamDecoder
 
 from .decoder import CTCHead, RNNTHead
 
