@@ -1,0 +1,100 @@
+model_class: ctc
+sample_rate: 16000
+labels:
+- ' '
+- а
+- б
+- в
+- г
+- д
+- е
+- ж
+- з
+- и
+- й
+- к
+- л
+- м
+- н
+- о
+- п
+- р
+- с
+- т
+- у
+- ф
+- х
+- ц
+- ч
+- ш
+- щ
+- ъ
+- ы
+- ь
+- э
+- ю
+- я
+preprocessor:
+  _target_: gigaam.preprocess.FeatureExtractor
+  sample_rate: 16000
+  features: 64
+encoder:
+  _target_: gigaam.encoder.ConformerEncoder
+  feat_in: 64
+  n_layers: 16
+  d_model: 768
+  subsampling_factor: 4
+  ff_expansion_factor: 4
+  self_attention_model: rotary
+  pos_emb_max_len: 5000
+  n_heads: 16
+  conv_kernel_size: 31
+  flash_attn: false
+head:
+  _target_: gigaam.decoder.CTCHead
+  feat_in: 768
+  num_classes: 34
+decoding:
+  _target_: gigaam.decoding.CTCBeamLMDecoding
+  vocabulary:
+  - ' '
+  - а
+  - б
+  - в
+  - г
+  - д
+  - е
+  - ж
+  - з
+  - и
+  - й
+  - к
+  - л
+  - м
+  - н
+  - о
+  - п
+  - р
+  - с
+  - т
+  - у
+  - ф
+  - х
+  - ц
+  - ч
+  - ш
+  - щ
+  - ъ
+  - ы
+  - ь
+  - э
+  - ю
+  - я
+  ngram_arpa_path: null
+  alpha: 0.0
+  beta: 0.0
+  cutoff_top_n: 40
+  cutoff_prob: 1.0
+  beam_width: 100
+  num_processes: 4
+model_name: v2_ctc
