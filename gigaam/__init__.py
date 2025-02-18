@@ -3,6 +3,7 @@ import os
 import urllib.request
 from typing import Optional, Tuple, Union
 
+import omegaconf
 import torch
 from tqdm import tqdm
 
@@ -84,6 +85,7 @@ def load_model(
     model_name: str,
     fp16_encoder: bool = True,
     use_flash: Optional[bool] = False,
+    cfg: Optional[omegaconf.DictConfig] = None,
     device: Optional[Union[str, torch.device]] = None,
     download_root: Optional[str] = None,
 ) -> Union[GigaAM, GigaAMEmo, GigaAMASR]:
@@ -99,6 +101,8 @@ def load_model(
     use_flash : Optional[bool]
         Whether to use flash_attn if the model allows it (requires the flash_attn library installed).
         Default to False.
+    cfg : Optional[omegaconf.DictConfig]
+        The configuration to use for the model. If not provided, the default configuration will be used.
     device : Optional[Union[str, torch.device]]
         The device to load the model onto. Defaults to "cuda" if available, otherwise "cpu".
     download_root : Optional[str]
@@ -116,6 +120,9 @@ def load_model(
     tokenizer_path = _download_tokenizer(model_name, download_root)
 
     checkpoint = torch.load(model_path, map_location="cpu")
+
+    if cfg is not None:
+        checkpoint["cfg"] = cfg
 
     if use_flash is not None:
         checkpoint["cfg"].encoder.flash_attn = use_flash
