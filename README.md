@@ -1,3 +1,30 @@
+# GigaAM-CTC + ctcdecode for beamsearch decoding with ngram LMs
+## installation
+```bash
+   git clone --recursive https://github.com/WayenVan/ctcdecode.git
+   cd ctcdecode && pip install .
+
+   cd ..
+   git clone https://github.com/waveletdeboshir/GigaAM.git
+   cd GigaAM && pip install -e .
+```
+## usage
+```py
+   import gigaam
+   import omegaconf
+
+   cfg = omegaconf.OmegaConf.load("./configs/ctc_beam_lm.yaml")
+   cfg.decoding.update(
+      {
+         "ngram_arpa_path": "path/to/your/arpa/lm/file",
+         "alpha": 1.,
+         "beta": 1.,
+         "beam_width": 128,
+      }
+   )
+   model = gigaam.load_model("ctc", cfg=cfg)
+```
+
 # GigaAM: the family of open-source acoustic models for speech processing
 
 ![plot](./gigaam_scheme.svg)
