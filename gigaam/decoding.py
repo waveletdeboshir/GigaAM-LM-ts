@@ -3,6 +3,7 @@ from typing import List, Optional
 import torch
 from sentencepiece import SentencePieceProcessor
 from torch import Tensor
+from ctcdecode import CTCBeamDecoder
 
 from .decoder import CTCHead, RNNTHead
 
@@ -71,6 +72,62 @@ class CTCGreedyDecoding:
         for i in range(b):
             pred_texts.append(
                 "".join(self.tokenizer.decode(labels[i][skip_mask[i]].cpu().tolist()))
+            )
+        return pred_texts
+
+
+class CTCBeamLMDecoding:
+    """
+    Class for performing beamsearch decoding ngram LM rescoring of CTC outputs.
+    """
+
+    def __init__(
+            self,
+            vocabulary: List[str],
+            model_path: Optional[str] = None,
+            ngram_arpa_path: Optional[str] = None,
+            alpha: float = 0.,
+            beta: float = 0.,
+            cutoff_top_n: int = 40,
+            cutoff_prob: float = 1.0,
+            beam_width: int = 100,
+            num_processes: int = 4,
+        ):
+        self.tokenizer = Tokenizer(vocabulary, model_path)
+        self.blank_id = len(self.tokenizer)
+        self.decoder = CTCBeamDecoder(
+                labels="".join(vocabulary) + "_",
+                model_path=ngram_arpa_path,
+                alpha=alpha,
+                beta=beta,
+                cutoff_top_n=cutoff_top_n,
+                cutoff_prob=cutoff_prob,
+                beam_width=beam_width,
+                num_processes=num_processes,
+                blank_id=self.blank_id,
+                log_probs_input=True
+        )
+
+    @torch.inference_mode()
+    def decode(self, head: CTCHead, encoded: Tensor, lengths: Tensor) -> List[str]:
+        """
+        Decode the output of a CTC model into a list of hypotheses.
+        """
+        log_probs = head(encoder_output=encoded)
+        assert (
+            len(log_probs.shape) == 3
+        ), f"Expected log_probs shape {log_probs.shape} == [B, T, C]"
+        b, _, c = log_probs.shape
+        assert (
+            c == len(self.tokenizer) + 1
+        ), f"Num classes {c} != len(vocab) + 1 {len(self.tokenizer) + 1}"
+
+        beam_results, beam_scores, timesteps, out_lens = self.decoder.decode(log_probs)
+
+        pred_texts: List[str] = []
+        for i in range(b):
+            pred_texts.append(
+                "".join(self.tokenizer.decode(beam_results[i][0][:out_lens[i][0]]))
             )
         return pred_texts
 
