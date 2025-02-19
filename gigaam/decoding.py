@@ -127,7 +127,7 @@ class CTCBeamLMDecoding:
         pred_texts: List[str] = []
         for i in range(b):
             pred_texts.append(
-                "".join(self.tokenizer.decode(beam_results[i][0][:out_lens[i][0]]))
+                "".join(self.tokenizer.decode(beam_results[i][0][:out_lens[i][0]].cpu().tolist()))
             )
         return pred_texts
 
