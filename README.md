@@ -23,6 +23,8 @@
       }
    )
    model = gigaam.load_model("ctc", cfg=cfg)
+
+  model.transcribe("file.wav")["text"]
 ```
 
 # GigaAM: the family of open-source acoustic models for speech processing
