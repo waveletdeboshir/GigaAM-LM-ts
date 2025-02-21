@@ -85,7 +85,7 @@ class GigaAMASR(GigaAM):
         self.decoding = hydra.utils.instantiate(self.cfg.decoding)
 
     @torch.inference_mode()
-    def transcribe(self, wav_file: str) -> str:
+    def transcribe(self, wav_file: str, return_ts: bool = False) -> Union[str, List[dict]]:
         """
         Transcribes a short audio file into text.
         """
@@ -94,9 +94,8 @@ class GigaAMASR(GigaAM):
             raise ValueError("Too long wav file, use 'transcribe_longform' method.")
 
         encoded, encoded_len = self.forward(wav, length)
-        log_probs = self.head(encoder_output=encoded)
-        text = self.decoding.decode(self.head, encoded, encoded_len)[0]
-        return {"text": text, "log_probs": log_probs}
+        result = self.decoding.decode(self.head, encoded, encoded_len, return_ts=return_ts)[0]
+        return result
 
     def forward_for_export(self, features: Tensor, feature_lengths: Tensor) -> Tensor:
         """
