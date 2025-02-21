@@ -8,7 +8,7 @@ from torch import Tensor
 from .decoder import CTCHead, RNNTHead
 
 MS_PER_TS = 40
-MS_DELAY = -10
+MS_DELAY = 0
 
 class Tokenizer:
     """
