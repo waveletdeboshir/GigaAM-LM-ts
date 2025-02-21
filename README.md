@@ -1,4 +1,4 @@
-# GigaAM-CTC + ctcdecode for beamsearch decoding with ngram LMs
+# GigaAM2-CTC + ctcdecode for beamsearch decoding with ngram LMs + word-level timestamps
 ## installation
 ```bash
    git clone --recursive https://github.com/WayenVan/ctcdecode.git
@@ -16,15 +16,18 @@
    cfg = omegaconf.OmegaConf.load("./configs/ctc_beam_lm.yaml")
    cfg.decoding.update(
       {
-         "ngram_arpa_path": "path/to/your/arpa/lm/file",
-         "alpha": 1.,
-         "beta": 1.,
+         "ngram_arpa_path": "path/to/your/arpa/lm/file", # or None
+         "alpha": 1., # 0
+         "beta": 1., # 0
          "beam_width": 128,
       }
    )
    model = gigaam.load_model("ctc", cfg=cfg)
 
-  model.transcribe("file.wav")["text"]
+  # to get only text
+  model.transcribe("file.wav", return_ts=False)
+  # to get word-level timestamps in millisec
+  model.transcribe("file.wav", return_ts=True)
 ```
 
 # GigaAM: the family of open-source acoustic models for speech processing
