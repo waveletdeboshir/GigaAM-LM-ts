@@ -5,8 +5,8 @@
    cd ctcdecode && pip install .
 
    cd ..
-   git clone https://github.com/waveletdeboshir/GigaAM.git
-   cd GigaAM && pip install -e .
+   git clone https://github.com/waveletdeboshir/GigaAM-LM-ts.git
+   cd GigaAM-LM-ts && pip install -e .
 ```
 ## usage
 ```py
